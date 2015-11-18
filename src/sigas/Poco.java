@@ -4,12 +4,14 @@ public class Poco {
 	String name;
 	String code;
 	int poco_id;
+	int manutencao;
 	
 	/** Construtor que recebe os dados fundamentais para se ter um poço */
-	public Poco(String name, String code, int poco_id) {
+	public Poco(String name, String code, int poco_id, int manutencao) {
 		this.name = name;
 		this.code = code;
 		this.poco_id = poco_id;
+		this.manutencao = manutencao;
 	}
 	
 	/** Retorna o numero de pocos cadastrados para a empresa idempresa */
@@ -36,6 +38,12 @@ public class Poco {
 	}
 	public void setCode(String code) {
 		this.code = code;
+	}
+	public int getManutencao() {
+		return manutencao;
+	}
+	public void setManutencao(int manutencao) {
+		this.manutencao = manutencao;
 	}
 	
 	public static void main (String[] args){

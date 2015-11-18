@@ -2,7 +2,6 @@ package sigas;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 // ***** ATENÇÃO!! ESTAMOS UTIULIZANDO COMO CODE A STRING UTM_NORTE!! CASO SEJA NECESSÁRIO TROCAR O CODE, MUDAR SQLS AQUI!!
 public class Sistema {
@@ -68,14 +67,15 @@ public class Sistema {
 
 		try {
 			System.out.println("Executando query para buscar pocos de um sistema");
-			ResultSet rs = db.execQuery("select id_poco, nome, utm_norte from poco_gerais where id_sistema="+this.getId_sistema()+" order by nome");
+			ResultSet rs = db.execQuery("select id_poco, nome, utm_norte, manutencao from poco_gerais where id_sistema="+this.getId_sistema()+" order by nome");
 			while (rs.next()){				
 				int poco_id = rs.getInt("id_poco");
 				String name = rs.getString("nome");
 				String code = rs.getString("utm_norte");
+				int manutencao = rs.getInt("manutencao");
 				
 				System.out.println("Recuperei um Poco de nome: " + name + " e code: " + code);
-				pocosList.add(new Poco(name, code, poco_id));
+				pocosList.add(new Poco(name, code, poco_id, manutencao));
 			}
 			pocos = new Poco[pocosList.size()];
 			pocosList.toArray(pocos);			
