@@ -60,10 +60,7 @@ public class DataRequester {
 			}
 		}		
 		return statusPoco;
-		
-		
-	}	
-	
+	}
 
 	
 	/**
@@ -171,32 +168,6 @@ public class DataRequester {
 	    db.close();
 	    return med;
 	}
-		
-	/*
-	private Medida xxxx(ResultSet c2, ResultSet rs, String type) {
-		Medida med = null;
-		float nivel = 0;
-		float corrente = 0;
-		int volume = 0;
-		float cesp = 0;
-		float vazao = 0;
-		try {
-			if(type.equals("nivel")){
-				nivel = rs.getFloat("nivel");
-			} 
-			if(c2.next() && c2!=null) {				
-				corrente = c2.getFloat("corrente");
-				vazao = c2.getFloat("vazao");
-				volume = c2.getInt("volume");				
-				cesp = c2.getFloat("cesp");
-			}			
-			java.sql.Timestamp ts = rs.getTimestamp("data");
-			med = new Medida(nivel, corrente, vazao, volume, cesp, ts);
-		} catch (Exception e) {
-			System.out.println("Erro lendo rs em create medida" + e.getMessage());
-		}
-		return med;		
-	}*/
 	
 	private void createLines (Database db, int pocoId) throws Exception {
 		String sql = "insert into operacionais (idpoco) values ("+ pocoId +")";
@@ -281,7 +252,7 @@ public class DataRequester {
 				+ reativado_data + "', '" 
 				+ obs + "', "
 				+ "GEN_ID(POCO_ID, 1)" + ", "
-				+ id_sistema + ")";
+				+ id_sistema + ",0)";
 		System.out.println(query);
 		try {
 			db.insert(query);	
@@ -447,102 +418,6 @@ public class DataRequester {
 			System.out.println("... Contrato: " + emp[i].getContrato());
 			System.out.println("... Usuario master: " + emp[i].getMasterUser());
 		}*/
-		
-		
-		/*
-		StatusPoco[] status = dr.pocosOnline(2);
-		for(int i=0; i<status.length; i++) {
-			System.out.println("-----  Poço: "+status[i].poco.getName()+ " operacao: "+status[i].isOperating + " Status: "+status[i].unknownState);
-		}*/
-/*		
-		Medida med = (Medida) dr.onlineData("489294.33e");
-		java.sql.Timestamp sqlTs = med.getTs();
-		java.util.Date ts = (java.util.Date) sqlTs;
-		
-		dr.createPocoSlim("Sexto", 7, "tri", "utmfsboa");
-	*/	
-		//Sistema[] list = dr.getSistemas(1);
-		//dr.createPoco("teste", "end", "loc", "munic", "rs", "90230-220", "123456", "2312", "lat", "long", "out", "art", "tecnico", "art_no", "finali", "out", "e_ou", "sao", "data", "obs", 1);
-		
-		
-		//dr.createPoco(32, "joaquim", "candongas10", "vila seca", "acordeao do oeste", "RS", "90002123", "utmnorte", "utm_sul", "121212", "long12", "2", "art2", "dunga", "2", "legal", "100", "10", "boa sim", "12/12/2012", "obs");
-		
-		//Medida med = dr.onlineData();
-
-		// Empresa.updateEmpresa("Internacional","123456789","10","20","30","2", "master", "senha");		
-		
-	/*	
-		Empresa emp = new Empresa(1);
-		emp.setEmpresa(1);
-		System.out.println("Nome da Empresa: "+emp.getNome());
-		System.out.println("Num Sistemas: "+emp.getNum_sistemas());
-		System.out.println("Num Pocos: "+emp.getNum_pocos());
-		System.out.println("Num Usuarios: "+emp.getNum_usuarios());
-		System.out.println("Num Modulos: "+emp.getNum_modulos());
-		System.out.println("Num Contrato: "+emp.getNumContrato());
-	*/
-	/*	
-		
-		
-		Empresa[] emp = dr.getEmpresas();
-		
-		for(int i=0; i<emp.length; i++) {
-			System.out.println("Empresa: " + emp[i].getNome() );
-			System.out.println("... Contrato: " + emp[i].getContrato());
-			System.out.println("... Usuario master: " + emp[i].getMasterUser());
-		}
-
-		String modulos = emp[0].getModulos();
-		StringTokenizer str = new StringTokenizer(modulos, ":");
-		HashMap<String, String> hash = new HashMap<String, String>();
-		
-		while (str.hasMoreTokens()){			
-			String unit = str.nextToken().trim();
-			hash.put(unit, unit);			
-		}
-		
-		
-		if(hash.get("3")!= null)
-			System.out.println("Tem 3 ");
-		else
-			System.out.println("Não tem 3? ");
-			
-		if(hash.get("1")!= null)
-			System.out.println("Tem 1 ");
-		else
-			System.out.println("Não tem 1? ");
-		
-		if(hash.get("2")!= null)
-			System.out.println("Tem 2 ");
-		else
-			System.out.println("Não tem 2? ");
-		
-		
-	*/	
-		
-		
-		/*
-		Medida med[][] = dr.daysData("18/11/2014","450814E","nivel");
-		
-		System.out.println("Dados recuperados...");
-		for(int i=0; i<20; i++){
-			for(int j=0; j<24; j++){
-				if(med[i][j]!=null) {
-					System.out.println("Medida na linha " + i + " hora: " + med[i][j].getTs().getHours());
-					System.out.println("   Nivel: " + med[i][j].getNivel());
-					System.out.println("   Corrente: " + med[i][j].getCorrente());
-					System.out.println("   Vazao: " + med[i][j].getVazao());
-					System.out.println("   Volume: " + med[i][j].getVolume());
-					System.out.println("   CESP: " + med[i][j].getCesp());					
-					System.out.println("   Time: "+med[i][j].getTs());
-				}
-			}
-		}
-		*/
-		
-		
-		
-		
 		
 	}
 

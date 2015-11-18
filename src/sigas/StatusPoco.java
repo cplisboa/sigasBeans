@@ -4,8 +4,9 @@ public class StatusPoco {
 
 	public Poco poco;
 	public Medida med;
-	public boolean isOperating=false;
-	public boolean unknownState=false;
+	public boolean isOperating = false;
+	public boolean hasManutencao = false;
+	public boolean unknownState = false;
 	long difDias = 0;
 
 	public StatusPoco(Poco poco, Medida med) {
@@ -32,24 +33,29 @@ public class StatusPoco {
 			long difHoras = diff/1000/60/60;
 			long difDias = diff/1000/60/60/24;
 				
-			if(difDias >= 1) {
-				frase = "Sem leitura a "+difDias+" dia(s)";
-				unknownState = true;
-			} else if (difHoras  > 8) {
-				frase = "Sem leitura a "+difHoras+" horas";			
+			if(poco.manutencao == 1) {
+				frase = "POÇO EM MANUTENÇÃO. DADOS APRESENTADOS APENAS PARA TESTES";
+				this.hasManutencao = true;
 				unknownState = true;
 			} else {
-				if ((med.getNivel()==0) && (med.getCorrente()==0) && (med.getVazao()==0)) {
-					frase = "Poço em Manutenção";
-				} else if(med.getCorrente() > 0) {
-					frase = "Em opera&ccedil;&atilde;o";
+				if(difDias >= 1) {
+					frase = "Sem leitura a "+difDias+" dia(s)";
+					unknownState = true;
+				} else if (difHoras  > 8) {
+					frase = "Sem leitura a "+difHoras+" horas";			
+					unknownState = true;
 				} else {
-					frase = "Em repouso";
-				}								
+					if ((med.getNivel()==0) && (med.getCorrente()==0) && (med.getVazao()==0)) {
+						frase = "Poço em Manutenção";
+					} else if(med.getCorrente() > 0) {
+						frase = "Em opera&ccedil;&atilde;o";
+					} else {
+						frase = "Em repouso";
+					}								
+				}
 			}
 		}
-		return frase;
-				
+		return frase;				
 	}
 
 	/**
