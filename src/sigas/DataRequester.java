@@ -235,11 +235,12 @@ public class DataRequester {
 		
 		//Recupera proximo Id do generator que será usado
 		int generator = getPocoId(db);
-		String sql = "insert into poco_gerais (nome, id_sistema, utm_norte, utm_sul, id_poco) values ("
+		String sql = "insert into poco_gerais (nome, id_sistema, utm_norte, utm_sul, manutencao, id_poco) values ("
 				+ "'" + nome + "',"
 				+ id_sistema +","
 				+ "'" + utm_norte + "',"
 				+ "'" + utm_leste + "',"
+				+ "0,"
 				+ generator + ")";
 		
 		System.out.println(sql);
