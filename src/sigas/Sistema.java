@@ -68,11 +68,16 @@ public class Sistema {
 		try {
 			System.out.println("Executando query para buscar pocos de um sistema");
 			ResultSet rs = db.execQuery("select id_poco, nome, utm_norte, manutencao from poco_gerais where id_sistema="+this.getId_sistema()+" order by nome");
-			while (rs.next()){				
+			while (rs.next()){
+				int manutencao = 0;
 				int poco_id = rs.getInt("id_poco");
 				String name = rs.getString("nome");
 				String code = rs.getString("utm_norte");
-				int manutencao = rs.getInt("manutencao");
+				try {
+					manutencao = rs.getInt("manutencao");
+				} catch(Exception e){
+					// Manutenção pode estar em null para poços antigos
+				}
 				
 				System.out.println("Recuperei um Poco de nome: " + name + " e code: " + code);
 				pocosList.add(new Poco(name, code, poco_id, manutencao));
