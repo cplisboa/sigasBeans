@@ -34,15 +34,15 @@ public class StatusPoco {
 			long difDias = diff/1000/60/60/24;
 				
 			if(poco.manutencao == 1) {
-				frase = "PO&Ccedil;O EM MANUTENPO&Ccedil;&Atilde;O. DADOS APRESENTADOS APENAS PARA TESTES";
+				frase = "EM MANUTEN&Ccedil;&Atilde;O.";
 				this.hasManutencao = true;
 				unknownState = true;
 			} else {
 				if(difDias >= 1) {
-					frase = "Sem leitura a "+difDias+" dia(s)";
+					frase = "Sem leitura &agrave "+difDias+" dia(s)";
 					unknownState = true;
 				} else if (difHoras  > 8) {
-					frase = "Sem leitura a "+difHoras+" horas";			
+					frase = "Sem leitura &agrave "+difHoras+" horas";			
 					unknownState = true;
 				} else {
 					if ((med.getNivel()==0) && (med.getCorrente()==0) && (med.getVazao()==0)) {
@@ -56,14 +56,6 @@ public class StatusPoco {
 			}
 		}
 		return frase;				
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
 	}
 
 }
