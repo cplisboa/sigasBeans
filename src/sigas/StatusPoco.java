@@ -34,7 +34,7 @@ public class StatusPoco {
 			long difDias = diff/1000/60/60/24;
 				
 			if(poco.manutencao == 1) {
-				frase = "POÇO EM MANUTENÇÃO. DADOS APRESENTADOS APENAS PARA TESTES";
+				frase = "PO&Ccedil;O EM MANUTENPO&Ccedil;&Atilde;O. DADOS APRESENTADOS APENAS PARA TESTES";
 				this.hasManutencao = true;
 				unknownState = true;
 			} else {
