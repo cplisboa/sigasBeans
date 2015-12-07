@@ -79,7 +79,7 @@ public class Sistema {
 					// Manutenção pode estar em null para poços antigos
 				}
 				
-				System.out.println("Recuperei um Poco de nome: " + name + " e code: " + code);
+				System.out.println("Recuperei um Poco de nome: " + name + ", code: " + code+ " e manutencao = "+manutencao);
 				pocosList.add(new Poco(name, code, poco_id, manutencao));
 			}
 			pocos = new Poco[pocosList.size()];
