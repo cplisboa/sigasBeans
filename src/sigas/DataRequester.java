@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public class DataRequester {
@@ -105,7 +108,165 @@ public class DataRequester {
     	}    	
     	return med;
 	}
+	
+	public List<DadosAnuais> dadosAnuais(String code, String grandeza, String agregacao) {
+		db = new Database(urlDb,"SYSDBA","masterkey");
+		HashMap<Integer, DadosAnuais> hash = new HashMap<Integer, DadosAnuais>();
+
+		String consulta = "select code, CAST(EXTRACT(MONTH FROM DATA) || '.' || EXTRACT(YEAR FROM DATA) AS CHAR(10)) as DATA,"
+			+ " "+agregacao+"("+grandeza+") as agg"    //e.g. max(nivel)
+			+ " from grandezas group by 1,2 order by 1,2";
 		
+		try {				    
+		    ResultSet rs=db.execQuery(consulta);
+			while (rs.next()){	
+				String data = rs.getString("data");
+				float agg = rs.getFloat("agg");
+
+			  	StringTokenizer strData = new StringTokenizer(data, ".");	
+				int mes = Integer.parseInt(strData.nextToken());
+				int ano = Integer.parseInt(strData.nextToken());
+				
+				//Verifica se dado já existe na hash
+				DadosAnuais anuais = hash.get(ano);
+				if(anuais == null){
+					anuais = new DadosAnuais(ano);
+				}
+				anuais.dadoMensal[mes] = agg;
+				hash.put(ano, anuais);					
+			}
+			rs.close();
+			db.close();
+	    } catch (Exception e) {
+		    System.out.println("Erro recuperando jornada diaria. Code="+code+". "+e.getMessage());
+	    }
+		List<DadosAnuais> lista = (List<DadosAnuais>) hash.values();
+		return lista;
+	}
+	
+	
+	public float[][] jornada(String dayStr,String code) {
+		
+		db = new Database(urlDb,"SYSDBA","masterkey");		
+		float[][] medida = new float[13][32];
+		
+	  	StringTokenizer strData = new StringTokenizer(dayStr, "/");	
+		int dia = Integer.parseInt(strData.nextToken());
+		int mes = Integer.parseInt(strData.nextToken());  //MES E DIA NAO SAO UTILIZADOS NO MAXIMO DO MES
+		int ano = Integer.parseInt(strData.nextToken());
+
+		String consulta = "select code, CAST(EXTRACT(DAY FROM DATA) || '.' || EXTRACT(MONTH FROM DATA) || '.'"
+			+ " || EXTRACT(YEAR FROM DATA) AS CHAR(10)) as DATA, "
+			+ " count(1) / 4 as jornada "
+			+ " from grandezas "
+			+ " where code='" + code + "'"
+			+ " and corrente > 1 "
+			+ " and extract (year from data) = " + ano
+			+ " group by 1,2";
+		
+		try {				    
+		    ResultSet rs=db.execQuery(consulta);
+		    float anterior = 0;    
+			while (rs.next()){	
+				String data = rs.getString("data");
+				float max = rs.getFloat("jornada");
+
+				if(max > 24) {
+					//casos de erro de medida que retornam + do que 24 horas de bombeamento
+					max=anterior;
+				}
+			  	strData = new StringTokenizer(data, ".");	
+				dia = Integer.parseInt(strData.nextToken());
+				mes = Integer.parseInt(strData.nextToken());
+				medida[mes][dia] = max;
+				anterior = max;
+			}
+			rs.close();
+			db.close();
+	    } catch (Exception e) {
+		    System.out.println("Erro recuperando jornada diaria. Code="+code+". "+e.getMessage());
+	    }
+		return medida;
+	}
+	
+	
+	public float[][] demanda(String dayStr, String code) {
+		db = new Database(urlDb,"SYSDBA","masterkey");		
+		float[][] medida = new float[13][32];
+		
+	  	StringTokenizer strData = new StringTokenizer(dayStr, "/");	
+		int dia = Integer.parseInt(strData.nextToken());
+		int mes = Integer.parseInt(strData.nextToken());  //MES E DIA NAO SAO UTILIZADOS NO MAXIMO DO MES
+		int ano = Integer.parseInt(strData.nextToken());
+
+		String consulta = "select code, CAST(EXTRACT(DAY FROM DATA) || '.' || EXTRACT(MONTH FROM DATA) || '.'"
+			+ " || EXTRACT(YEAR FROM DATA) AS CHAR(10)) as DATA, "
+		    + " max(hidrometro) - min(hidrometro) as demanda"
+		    + " from grandezas "
+		    + " where code='" + code + "' and extract (year from data) = " + ano
+		    + " group by 1,2";
+		
+		try {				    
+		    ResultSet rs=db.execQuery(consulta);
+		        
+			while (rs.next()){	
+				String data = rs.getString("data");
+				float max = rs.getFloat("demanda");
+
+			  	strData = new StringTokenizer(data, ".");	
+				dia = Integer.parseInt(strData.nextToken());
+				mes = Integer.parseInt(strData.nextToken());
+				medida[mes][dia] = max;
+			}
+			rs.close();
+			db.close();
+	    } catch (Exception e) {
+		    System.out.println("Erro recuperando demanda diaria. Code="+code+". "+e.getMessage());
+	    }
+		return medida;
+	}
+
+	/**
+	 * Calcula o nivel maximo dia-a-dia
+	 * @param code
+	 * @return
+	 */
+	public float[][] nivelAgrupadoMes(String dayStr, String agregacao, String code) {
+		db = new Database(urlDb,"SYSDBA","masterkey");		
+		float[][] medida = new float[13][32];
+		
+	  	StringTokenizer strData = new StringTokenizer(dayStr, "/");	
+		int dia = Integer.parseInt(strData.nextToken());
+		int mes = Integer.parseInt(strData.nextToken());  //MES E DIA NAO SAO UTILIZADOS NO MAXIMO DO MES
+		int ano = Integer.parseInt(strData.nextToken());
+		
+	    String consulta = "select "+agregacao+"(nivel), CAST(EXTRACT(DAY FROM DATA) || '.' || EXTRACT(MONTH FROM "
+	    	+ " DATA) || '.' || EXTRACT(YEAR FROM DATA) AS CHAR(10)) as DATA, code "
+	    	+ " FROM GRANDEZAS "
+	    	+ " WHERE code='" + code + "'"
+	    	+ " AND EXTRACT (year from data) = "+ano+" and nivel >=0"
+	    	+ " GROUP BY  2,3";
+
+		try {				    
+		    ResultSet rs=db.execQuery(consulta);
+		        
+			while (rs.next()){	
+				String data = rs.getString("data");
+				float max = rs.getFloat(agregacao);
+
+			  	strData = new StringTokenizer(data, ".");	
+				dia = Integer.parseInt(strData.nextToken());
+				mes = Integer.parseInt(strData.nextToken());
+				medida[mes][dia] = max;
+			}
+			rs.close();
+			db.close();
+	    } catch (Exception e) {
+		    System.out.println("Erro recuperando nivel "+agregacao+" mensal. Code="+code+". "+e.getMessage());
+	    }
+		return medida;
+	}
+	
 	
 	/** Recupera as medidas PRÓXIMAS aquele dia (-10 até +10)
 	 * 
@@ -115,6 +276,10 @@ public class DataRequester {
 	 * @return
 	 */
 	public Medida[][] daysData(String dayStr, String code, String type) {		
+		
+		if (type.equals("nivelMax")) {
+			//calcNivelMax()
+		}
 		db = new Database(urlDb,"SYSDBA","masterkey");		
 		Medida[][] med = new Medida[20][24];
 		int linhas = 20;
@@ -393,11 +558,28 @@ public class DataRequester {
 	public static void main(String[] args) {
 		DataRequester dr = new DataRequester("jdbc:firebirdsql:localhost/3050:C:/juper/old_site/SIGAS.GDB");
 		
-		//DataRequester dr = new DataRequester("jdbc:firebirdsql:localhost/3050:C:/juper/old_site/SIGAS.GDB");
-		StatusPoco[] status = dr.pocosOnline(9);
-		for(int i=0; i<status.length; i++) {
-			System.out.println("-----  Poço: "+status[i].poco.getName()+ " operacao: "+status[i].isOperating + " Frase: "+status[i].getFrase());			
+		List<DadosAnuais> lista = dr.dadosAnuais("451707E", "nivel", "max");
+		for(DadosAnuais dado:lista) {
+			for(int i=1; i<= 12; i++) {
+				System.out.println(dado.ano + "/" + i +": "+dado.dadoMensal[i]);				
+			}			
 		}
+	
+		/*
+		float medida[][] = dr.jornada("21/12/2015", "451707E");
+		for(int i=0; i<=12; i++){
+			for(int j=0; j<=12; j++){
+				if(medida[i][j] > 0){
+					System.out.println(j+"/"+i+"/2015: "+medida[i][j]);
+				}
+			}
+		} */
+		
+		//DataRequester dr = new DataRequester("jdbc:firebirdsql:localhost/3050:C:/juper/old_site/SIGAS.GDB");
+		//StatusPoco[] status = dr.pocosOnline(9);
+		//for(int i=0; i<status.length; i++) {
+		//	System.out.println("-----  Poço: "+status[i].poco.getName()+ " operacao: "+status[i].isOperating + " Frase: "+status[i].getFrase());			
+		//}
 		/*
 		Medida med = (Medida) dr.onlineData("450814E");
 		float fl = med.getVazao();

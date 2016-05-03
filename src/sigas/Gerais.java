@@ -25,6 +25,7 @@ public class Gerais {
 	public String situacao; 
 	public String reativadoData; 
 	public String obs;
+	public int manutencao;
 		
 	public Gerais() {
 		super();
@@ -59,6 +60,7 @@ public class Gerais {
 	    		situacao=rs.getString("situacao");
 	    		reativadoData=rs.getString("reativado_data");
 	    		obs=rs.getString("observacoes");
+	    		manutencao = rs.getInt("manutencao");
 	    	}
 	    	rs.close();
        	} catch (Exception e) {
@@ -88,7 +90,7 @@ public class Gerais {
 				"finalidade='" + finalidade +"', " +
 				"vazao_outorgada='" + vazaoOutorgada +"', " +
 				"volume_outorgado='" + volumeOut +"', " +
-				"situacao='" + situacao +"', " +
+				"manutencao=" + manutencao +", " +
 				"reativado_data='" + reativadoData +"', " +
 				"observacoes='" + obs +"' " +
 				"where nome='" + nome + "'";		
