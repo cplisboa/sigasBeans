@@ -24,11 +24,11 @@ public class DataRequester {
 	}
 	
 	/** Retorna array com todos os poços de um sistema com seus respectivos dados cadastrais e ultimas medidas */
-	public StatusPoco[] pocosOnline(int idSistema){
+	public StatusPoco[] pocosOnline(int idSistema) throws SQLException {
 		
 		Sistema sys = new Sistema(idSistema);
 		StatusPoco[] statusPoco = null;
-		Database db = new Database();
+		db = new Database();
 		sys.fillPocos(db);
 		Poco[] pocos = sys.getPocos();
 		statusPoco = new StatusPoco[pocos.length];		
@@ -36,7 +36,8 @@ public class DataRequester {
 		//Percorre lista de poços do sistema para recuperar dado online
 		for (int i=0; i<pocos.length; i++) { 
 		    System.out.println("Poço: " + pocos[i].getName());				
-		    Medida med = onlineData(pocos[i].getCode());		    
+		    Medida med = onlineData(pocos[i].getCode());
+		    System.out.println("Já recuperou online data.");
 		    statusPoco[i] = new StatusPoco(pocos[i], med);
 		    		    
 			if (med!=null) { 
@@ -70,25 +71,17 @@ public class DataRequester {
 	 * Consulta a base e retorna ultima medida inserida
 	 * 
 	 */
-	public Medida onlineData(String code){
+	public Medida onlineData(String code) throws SQLException {
 		Medida med = null;
-		String queryNivel = "SELECT FIRST 1 nivel,data FROM SIGAS_POCOS WHERE CODIGO_STR = '" + code + "' ORDER BY DATA DESC";
+		ResultSet rx = null;
 		String queryGrandezas ="SELECT FIRST 1 * FROM GRANDEZAS WHERE CODE = '" + code + "' ORDER BY DATA DESC";
-		Database database = new Database();
-		if(db==null)
+		if(db==null){
 			db = new Database(urlDb,"SYSDBA","masterkey");
+			System.out.println("Precisei de uma base nova.");
+		}
     	try{
-    		//Recuperando ultimo dado do bd(Nivel)
-        	ResultSet rs = database.execQuery(queryNivel);
-        	if(rs.next()){        		
-        		med = new Medida();
-        		med.setTs(rs.getTimestamp("data"));
-        		med.setNivel(rs.getFloat("nivel"));
-        	} else {
-        		System.out.println("Nenhum dado na base para o poço: "+code);
-        	}      
-        	
-        	ResultSet rx = database.execQuery(queryGrandezas);
+        	rx = db.execQuery(queryGrandezas);
+
         	if(rx.next()){        		
         		if(med==null)
         			med = new Medida();
@@ -101,11 +94,13 @@ public class DataRequester {
         	} else {
         		System.out.println("Nenhuma Grandeza para o poço: "+code);
         	}      
-        	
+        	System.out.println("Termino da recuperação das ultimas grandezas e medidas");
     	} catch(Exception e) {
     		System.out.println("Erro recuperando ultimo dado inserido");
     		e.printStackTrace();
-    	}    	
+    	} finally{
+    		rx.close();
+    	}
     	return med;
 	}
 	
@@ -557,6 +552,13 @@ public class DataRequester {
 	 */
 	public static void main(String[] args) {
 		DataRequester dr = new DataRequester("jdbc:firebirdsql:localhost/3050:C:/juper/old_site/SIGAS.GDB");
+/*
+		Sistema[] list = dr.getSistemas(11);
+		for (int i=0; i<list.length; i++)
+			System.out.println(list[i].getId_sistema()+" - "+list[i].getNome());
+*/
+
+/*		
 		
 		List<DadosAnuais> lista = dr.dadosAnuais("451707E", "nivel", "max");
 		for(DadosAnuais dado:lista) {
@@ -576,15 +578,20 @@ public class DataRequester {
 		} */
 		
 		//DataRequester dr = new DataRequester("jdbc:firebirdsql:localhost/3050:C:/juper/old_site/SIGAS.GDB");
-		//StatusPoco[] status = dr.pocosOnline(9);
-		//for(int i=0; i<status.length; i++) {
-		//	System.out.println("-----  Poço: "+status[i].poco.getName()+ " operacao: "+status[i].isOperating + " Frase: "+status[i].getFrase());			
-		//}
+		try {
+			StatusPoco[] status = dr.pocosOnline(9);
+			for(int i=0; i<status.length; i++) {
+				System.out.println("-----  Poço: "+status[i].poco.getName()+ " operacao: "+status[i].isOperating + " Frase: "+status[i].getFrase());			
+			}
+		} catch(Exception e){
+			System.out.println("erro recuperando dados dos poços online."+e.getMessage());
+		}
 		/*
 		Medida med = (Medida) dr.onlineData("450814E");
 		float fl = med.getVazao();
 		System.out.println("Vazao eh: "+fl);
 		System.out.println("Volume eh: "+med.getVolume());
+		
 		
 		Sistema[] list = dr.getSistemas(11);
 		for (int i=0; i<list.length; i++)
